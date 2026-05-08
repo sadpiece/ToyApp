@@ -23,8 +23,8 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="BtnLogin" Grid.Column="0" Content="Вхід" Padding="8" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnLogin_Click_1" />
-                <Button x:Name="BtnCancel" Grid.Column="2" Content="Скасувати" Padding="8" Background="#A0AEC0" Foreground="White" BorderThickness="0" Click="BtnCancel_Click_1" />
+                <Button x:Name="BtnLogin" Grid.Column="0" Content="Вхід" Padding="8" Background="#4299E1" Foreground="White" BorderThickness="0"  />
+                <Button x:Name="BtnCancel" Grid.Column="2" Content="Скасувати" Padding="8" Background="#A0AEC0" Foreground="White" BorderThickness="0"  />
             </Grid>
         </StackPanel>
     </Border>

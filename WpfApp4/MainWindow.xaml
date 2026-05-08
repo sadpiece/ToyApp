@@ -37,16 +37,16 @@
             </MenuItem>
 
             <MenuItem x:Name="MenuManage" Header="Управління" Visibility="Collapsed" >
-                <MenuItem Header="Додати іграшку" Click="BtnAdd_Click_1"/>
-                <MenuItem Header="Редагувати запис" Click="BtnEdit_Click_1"/>
+                <MenuItem Header="Додати іграшку"/>
+                <MenuItem Header="Редагувати запис"/>
             </MenuItem>
 
             <MenuItem x:Name="MenuSearch" Header="Пошук">
-                <MenuItem x:Name="MenuSearchByAge" Header="За віковими межами" Click="MenuSearchByAge_Click"/>
+                <MenuItem x:Name="MenuSearchByAge" Header="За віковими межами"/>
             </MenuItem>
 
-            <MenuItem x:Name="MenuLogin" Header="Авторизація" Click="MenuLogin_Click"/>
-            <MenuItem x:Name="MenuLogout" Header="Вихід" Visibility="Collapsed" Click="MenuLogout_Click" />
+            <MenuItem x:Name="MenuLogin" Header="Авторизація"/>
+            <MenuItem x:Name="MenuLogout" Header="Вихід" Visibility="Collapsed" />
         </Menu>
 
         <!-- ПОШУК  -->
@@ -61,7 +61,7 @@
                 <TextBlock Text="Вік до (Y):" Margin="0,5,0,2"/>
                 <TextBox x:Name="TxtSearchY" Margin="0,0,0,20" Background="#1A202C" Foreground="White" Padding="5"/>
 
-                <Button x:Name="BtnSearch" Content="Шукати" Padding="5" Margin="0,0,0,10" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnSearch_Click"/>
+                <Button x:Name="BtnSearch" Content="Шукати" Padding="5" Margin="0,0,0,10" Background="#4299E1" Foreground="White" BorderThickness="0"/>
                 <Button x:Name="BtnExportWord"  Content="Зберегти у Word" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0" Visibility="Collapsed"/>
             </StackPanel>
         </Border>
@@ -93,15 +93,15 @@
         <StackPanel x:Name="PanelActionButtons" Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" Margin="5,40,5,10" >
             <Button x:Name="BtnAdd" Content="+" Width="30" Height="30" Margin="0,0,0,10" 
                     Background="#4A5568" Foreground="White" FontSize="18" FontWeight="Bold" 
-                    BorderThickness="0" Click="BtnAdd_Click_1" Visibility="Collapsed"/>
+                    BorderThickness="0" Visibility="Collapsed"/>
 
             <Button x:Name="BtnDelete" Content="✕" Width="30" Height="30" Margin="0,0,0,10" 
                     Background="#4A5568" Foreground="White" FontSize="14" FontWeight="Bold" 
-                    BorderThickness="0" Click="BtnDelete_Click_1" Visibility="Collapsed"/>
+                    BorderThickness="0" Visibility="Collapsed"/>
 
             <Button x:Name="BtnEdit" Content="✎" Width="30" Height="30" 
                     Background="#4A5568" Foreground="White" FontSize="16" 
-                    BorderThickness="0" Click="BtnEdit_Click_1" Visibility="Collapsed"/>
+                    BorderThickness="0" Visibility="Collapsed"/>
         </StackPanel>
 
         <!--  УПРАВЛІННЯ -->
@@ -122,7 +122,7 @@
                 <TextBlock Text="Вікові межі:" Margin="0,5,0,2"/>
                 <TextBox x:Name="TxtAge" Margin="0,0,0,20" Background="#1A202C" Foreground="White" Padding="5"/>
 
-                <Button x:Name="BtnSave" Content="Зберегти" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnSave_Click_1"/>
+                <Button x:Name="BtnSave" Content="Зберегти" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0"/>
             </StackPanel>
         </Border>
 

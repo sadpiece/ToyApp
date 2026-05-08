@@ -1,13 +1,6 @@
-﻿using System.Text;
+﻿using MySql.Data.MySqlClient;
+using System.Data;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace WpfApp4
 {
@@ -16,9 +9,28 @@ namespace WpfApp4
     /// </summary>
     public partial class MainWindow : Window
     {
+        string connStr = "server=localhost; user=root; password=sd000615; database=igrashky; port=3306;";
         public MainWindow()
         {
             InitializeComponent();
+            LoadData();
+        }
+
+        private void LoadData()
+        {
+            try
+            {
+                using (MySqlDataAdapter adapter = new MySqlDataAdapter("SELECT * FROM igrashky", connStr))
+                {
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+                    MainDataGrid.ItemsSource = dt.DefaultView;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Помилка завантаження даних: " + ex.Message);
+            }
         }
     }
 }
