@@ -1,0 +1,130 @@
+﻿<Window x:Class="WpfApp4.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp4"
+        mc:Ignorable="d"
+        Title="Асортимент іграшок" Height="500" Width="900"
+        Background="#1A202C" Foreground="White">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+
+        </Grid.ColumnDefinitions>
+
+        <!-- ВЕРХНЄ МЕНЮ -->
+        <Menu Grid.Row="0" Grid.ColumnSpan="4" Background="#2D3748" Foreground="White" Padding="5">
+
+            <Menu.Resources>
+                <Style TargetType="MenuItem">
+                    <Setter Property="Background" Value="#2D3748"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Style>
+            </Menu.Resources>
+            <MenuItem Header="Файл">
+                <MenuItem Header="Експорт у Word"/>
+            </MenuItem>
+
+            <MenuItem x:Name="MenuManage" Header="Управління" Visibility="Collapsed" >
+                <MenuItem Header="Додати іграшку" Click="BtnAdd_Click_1"/>
+                <MenuItem Header="Редагувати запис" Click="BtnEdit_Click_1"/>
+            </MenuItem>
+
+            <MenuItem x:Name="MenuSearch" Header="Пошук">
+                <MenuItem x:Name="MenuSearchByAge" Header="За віковими межами" Click="MenuSearchByAge_Click"/>
+            </MenuItem>
+
+            <MenuItem x:Name="MenuLogin" Header="Авторизація" Click="MenuLogin_Click"/>
+            <MenuItem x:Name="MenuLogout" Header="Вихід" Visibility="Collapsed" Click="MenuLogout_Click" />
+        </Menu>
+
+        <!-- ПОШУК  -->
+        <Border x:Name="PanelSearch" Grid.Row="1" Grid.Column="0" Width="220" 
+                Background="#2D3748" Margin="10" Padding="15" CornerRadius="10" Visibility="Collapsed">
+            <StackPanel>
+                <TextBlock Text="Пошук іграшок" FontSize="16" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
+
+                <TextBlock Text="Вік від (X):" Margin="0,5,0,2"/>
+                <TextBox x:Name="TxtSearchX" Margin="0,0,0,10" Background="#1A202C" Foreground="White" Padding="5"/>
+
+                <TextBlock Text="Вік до (Y):" Margin="0,5,0,2"/>
+                <TextBox x:Name="TxtSearchY" Margin="0,0,0,20" Background="#1A202C" Foreground="White" Padding="5"/>
+
+                <Button x:Name="BtnSearch" Content="Шукати" Padding="5" Margin="0,0,0,10" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnSearch_Click"/>
+                <Button x:Name="BtnExportWord"  Content="Зберегти у Word" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0" Visibility="Collapsed"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ТАБЛИЦЯ  -->
+        <DataGrid x:Name="MainDataGrid" Grid.Row="1" Grid.Column="1" Margin="0,10,0,10" 
+          Background="#2D3748" RowBackground="#2D3748" AlternatingRowBackground="#1A202C"
+          AutoGenerateColumns="False" CanUserAddRows="False" 
+          Foreground="White">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#E2E8F0"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Padding" Value="5"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding id}" Width="50"/>
+                <DataGridTextColumn Header="Назва іграшки" Binding="{Binding name}" Width="*"/>
+                <DataGridTextColumn Header="Ціна" Binding="{Binding price}" Width="80"/>
+                <DataGridTextColumn Header="Кількість" Binding="{Binding amount}" Width="80"/>
+                <DataGridTextColumn Header="Вікові межі" Binding="{Binding ageRange}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <!-- КНОПКИ ДІЙ  -->
+        <StackPanel x:Name="PanelActionButtons" Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" Margin="5,40,5,10" >
+            <Button x:Name="BtnAdd" Content="+" Width="30" Height="30" Margin="0,0,0,10" 
+                    Background="#4A5568" Foreground="White" FontSize="18" FontWeight="Bold" 
+                    BorderThickness="0" Click="BtnAdd_Click_1" Visibility="Collapsed"/>
+
+            <Button x:Name="BtnDelete" Content="✕" Width="30" Height="30" Margin="0,0,0,10" 
+                    Background="#4A5568" Foreground="White" FontSize="14" FontWeight="Bold" 
+                    BorderThickness="0" Click="BtnDelete_Click_1" Visibility="Collapsed"/>
+
+            <Button x:Name="BtnEdit" Content="✎" Width="30" Height="30" 
+                    Background="#4A5568" Foreground="White" FontSize="16" 
+                    BorderThickness="0" Click="BtnEdit_Click_1" Visibility="Collapsed"/>
+        </StackPanel>
+
+        <!--  УПРАВЛІННЯ -->
+        <Border x:Name="PanelManage" Grid.Row="1" Grid.Column="3" Width="220" 
+                Background="#2D3748" Margin="10" Padding="15" CornerRadius="10" Visibility="Collapsed" >
+            <StackPanel>
+                <TextBlock x:Name="TxtManageTitle" Text="Управління даними" FontSize="16" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
+
+                <TextBlock Text="Назва іграшки:" Margin="0,5,0,2"/>
+                <TextBox x:Name="TxtName" Margin="0,0,0,10" Background="#1A202C" Foreground="White" Padding="5"/>
+
+                <TextBlock Text="Ціна:" Margin="0,5,0,2"/>
+                <TextBox x:Name="TxtPrice" Margin="0,0,0,10" Background="#1A202C" Foreground="White" Padding="5"/>
+
+                <TextBlock Text="Кількість:" Margin="0,5,0,2"/>
+                <TextBox x:Name="TxtAmount" Margin="0,0,0,10" Background="#1A202C" Foreground="White" Padding="5"/>
+
+                <TextBlock Text="Вікові межі:" Margin="0,5,0,2"/>
+                <TextBox x:Name="TxtAge" Margin="0,0,0,20" Background="#1A202C" Foreground="White" Padding="5"/>
+
+                <Button x:Name="BtnSave" Content="Зберегти" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnSave_Click_1"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</Window>
