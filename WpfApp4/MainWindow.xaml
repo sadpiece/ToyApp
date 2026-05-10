@@ -38,15 +38,15 @@
 
             <MenuItem x:Name="MenuManage" Header="Управління" Visibility="Collapsed" >
                 <MenuItem Header="Додати іграшку"/>
-                <MenuItem Header="Редагувати запис"/>
+                <MenuItem Header="Редагувати запис" Click="BtnEdit_Click_1"/>
             </MenuItem>
 
             <MenuItem x:Name="MenuSearch" Header="Пошук">
                 <MenuItem x:Name="MenuSearchByAge" Header="За віковими межами"/>
             </MenuItem>
 
-            <MenuItem x:Name="MenuLogin" Header="Авторизація"/>
-            <MenuItem x:Name="MenuLogout" Header="Вихід" Visibility="Collapsed" />
+            <MenuItem x:Name="MenuLogin" Header="Авторизація" Click="MenuLogin_Click"/>
+            <MenuItem x:Name="MenuLogout" Header="Вихід" Visibility="Collapsed" Click="MenuLogout_Click" />
         </Menu>
 
         <!-- ПОШУК  -->
@@ -89,6 +89,7 @@
                 <DataGridTextColumn Header="Вікові межі" Binding="{Binding ageRange}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
+
         <!-- КНОПКИ ДІЙ  -->
         <StackPanel x:Name="PanelActionButtons" Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" Margin="5,40,5,10" >
             <Button x:Name="BtnAdd" Content="+" Width="30" Height="30" Margin="0,0,0,10" 
@@ -101,7 +102,7 @@
 
             <Button x:Name="BtnEdit" Content="✎" Width="30" Height="30" 
                     Background="#4A5568" Foreground="White" FontSize="16" 
-                    BorderThickness="0" Visibility="Collapsed"/>
+                    BorderThickness="0" Click="BtnEdit_Click_1" Visibility="Collapsed"/>
         </StackPanel>
 
         <!--  УПРАВЛІННЯ -->

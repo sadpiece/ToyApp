@@ -1,25 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace WpfApp4
 {
-    /// <summary>
-    /// Interaction logic for Window1.xaml
-    /// </summary>
     public partial class Window1 : Window
     {
+
+        private const string ExpectedLogin = "admin";
+        private const string ExpectedPassword = "1234";
+
         public Window1()
         {
             InitializeComponent();
         }
+
+        private void BtnLogin_Click_1(object sender, RoutedEventArgs e)
+        {
+
+            if (TxtLogin.Text == ExpectedLogin && TxtPassword.Password == ExpectedPassword)
+            {
+
+                this.DialogResult = true;
+            }
+            else
+            {
+
+                MessageBox.Show("Невірний логін або пароль!", "Помилка авторизації", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void BtnCancel_Click_1(object sender, RoutedEventArgs e)
+        { 
+
+            this.DialogResult = false;
+        }
+
+
     }
 }
