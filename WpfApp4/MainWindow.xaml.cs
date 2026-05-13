@@ -35,7 +35,7 @@ namespace WpfApp4
             }
         }
 
-        // --- РЕДАГУВАННЯ ---
+        // РЕДАГУВАННЯ 
         private void BtnEdit_Click_1(object sender, RoutedEventArgs e)
         {
             if (MainDataGrid.SelectedItem is DataRowView row)
@@ -56,14 +56,44 @@ namespace WpfApp4
             }
         }
 
+        // ЗБЕРЕЖЕННЯ 
+        private void BtnSave_Click_1(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connStr))
+                {
+                    conn.Open();
+                    string query = isEditMode
+                        ? "UPDATE igrashky SET name=@n, price=@p, amount=@a, ageRange=@age WHERE id=@id"
+                        : "INSERT INTO igrashky (name, price, amount, ageRange) VALUES (@n, @p, @a, @age)";
+
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@n", TxtName.Text);
+                    cmd.Parameters.AddWithValue("@p", TxtPrice.Text);
+                    cmd.Parameters.AddWithValue("@a", TxtAmount.Text);
+                    cmd.Parameters.AddWithValue("@age", TxtAge.Text);
+                    if (isEditMode) cmd.Parameters.AddWithValue("@id", selectedToyId);
+
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show(isEditMode ? "Запис оновлено!" : "Іграшку додано!");
+
+                    PanelManage.Visibility = Visibility.Collapsed;
+                    LoadData(); 
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Помилка збереження: " + ex.Message);
+            }
+        }
+
         private void MenuLogin_Click(object sender, RoutedEventArgs e)
         {
             Window1 authForm = new Window1();
 
-            // ShowDialog зупиняє виконання коду тут, поки Window1 не закриється
             if (authForm.ShowDialog() == true)
             {
-                // Якщо повернулося true, вмикаємо режим адміністратора
                 EnableAdminMode();
                 MessageBox.Show("Ви успішно увійшли як робітник магазину.", "Авторизація", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -103,6 +133,51 @@ namespace WpfApp4
 
             MenuLogin.Visibility = Visibility.Visible;
             MenuSearch.Visibility = Visibility.Visible;
+        }
+
+        // --- ДОДАВАННЯ ---
+        private void BtnAdd_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (MainDataGrid.Items.Count >= 150)
+            {
+                MessageBox.Show("Досягнуто ліміт асортименту (150 найменувань)!", "Обмеження");
+                return;
+            }
+            ClearFields();
+            isEditMode = false;
+            PanelManage.Visibility = Visibility.Visible;
+            TxtManageTitle.Text = "Додавання іграшки";
+        }
+
+        // ВИДАЛЕННЯ 
+        private void BtnDelete_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (MainDataGrid.SelectedItem is DataRowView row)
+            {
+                if (MessageBox.Show("Видалити цей запис?", "Підтвердження", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        using (MySqlConnection conn = new MySqlConnection(connStr))
+                        {
+                            conn.Open();
+                            MySqlCommand cmd = new MySqlCommand("DELETE FROM igrashky WHERE id=@id", conn);
+                            cmd.Parameters.AddWithValue("@id", row["id"]);
+                            cmd.ExecuteNonQuery();
+                            LoadData();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Помилка видалення: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private void ClearFields()
+        {
+            TxtName.Clear(); TxtPrice.Clear(); TxtAmount.Clear(); TxtAge.Clear();
         }
 
 
