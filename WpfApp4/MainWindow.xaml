@@ -42,14 +42,14 @@
             </MenuItem>
 
             <MenuItem x:Name="MenuSearch" Header="Пошук">
-                <MenuItem x:Name="MenuSearchByAge" Header="За віковими межами"/>
+                <MenuItem x:Name="MenuSearchByAge" Header="За віковими межами" Click="MenuSearchByAge_Click"/>
             </MenuItem>
 
             <MenuItem x:Name="MenuLogin" Header="Авторизація" Click="MenuLogin_Click"/>
             <MenuItem x:Name="MenuLogout" Header="Вихід" Visibility="Collapsed" Click="MenuLogout_Click" />
         </Menu>
 
-        <!-- ПАНЕЛЬ 1: ПОШУК  -->
+        <!-- ПОШУК  -->
         <Border x:Name="PanelSearch" Grid.Row="1" Grid.Column="0" Width="220" 
                 Background="#2D3748" Margin="10" Padding="15" CornerRadius="10" Visibility="Collapsed">
             <StackPanel>
@@ -61,7 +61,7 @@
                 <TextBlock Text="Вік до (Y):" Margin="0,5,0,2"/>
                 <TextBox x:Name="TxtSearchY" Margin="0,0,0,20" Background="#1A202C" Foreground="White" Padding="5"/>
 
-                <Button x:Name="BtnSearch" Content="Шукати" Padding="5" Margin="0,0,0,10" Background="#4299E1" Foreground="White" BorderThickness="0"/>
+                <Button x:Name="BtnSearch" Content="Шукати" Padding="5" Margin="0,0,0,10" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnSearch_Click"/>
                 <Button x:Name="BtnExportWord"  Content="Зберегти у Word" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0" Visibility="Collapsed"/>
             </StackPanel>
         </Border>

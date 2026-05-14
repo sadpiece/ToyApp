@@ -135,7 +135,7 @@ namespace WpfApp4
             MenuSearch.Visibility = Visibility.Visible;
         }
 
-        // --- ДОДАВАННЯ ---
+        // ДОДАВАННЯ
         private void BtnAdd_Click_1(object sender, RoutedEventArgs e)
         {
             if (MainDataGrid.Items.Count >= 150)
@@ -178,6 +178,87 @@ namespace WpfApp4
         private void ClearFields()
         {
             TxtName.Clear(); TxtPrice.Clear(); TxtAmount.Clear(); TxtAge.Clear();
+        }
+
+        private void BtnSearch_Click(object sender, RoutedEventArgs e)
+        {
+            if (!int.TryParse(TxtSearchX.Text, out int searchX) || !int.TryParse(TxtSearchY.Text, out int searchY))
+            {
+                MessageBox.Show("Будь ласка, введіть коректні числові значення для віку.");
+                return;
+            }
+
+            if (searchX > searchY)
+            {
+                MessageBox.Show("Вік 'ВІД' не може бути більшим за вік 'ДО'.");
+                return;
+            }
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connStr))
+                {
+                    conn.Open();
+                    MySqlDataAdapter adapter = new MySqlDataAdapter("SELECT * FROM igrashky", conn);
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+
+
+                    DataTable filteredTable = dt.Clone();
+
+
+                    float minPrice = float.MaxValue;
+                    string cheapestToyName = "";
+
+
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        string ageRangeStr = row["ageRange"].ToString(); 
+                        string[] parts = ageRangeStr.Split('-');        
+
+                        if (parts.Length == 2 && int.TryParse(parts[0], out int toyMinAge) && int.TryParse(parts[1], out int toyMaxAge))
+                        {
+
+                            if (toyMinAge <= searchY && toyMaxAge >= searchX)
+                            {
+
+                                filteredTable.ImportRow(row);
+
+                                float currentPrice = Convert.ToSingle(row["price"]);
+                                if (currentPrice < minPrice)
+                                {
+                                    minPrice = currentPrice;
+                                    cheapestToyName = row["name"].ToString();
+                                }
+                            }
+                        }
+                    }
+
+
+                    MainDataGrid.ItemsSource = filteredTable.DefaultView;
+
+
+                    if (filteredTable.Rows.Count > 0)
+                    {
+                        MessageBox.Show($"Знайдено іграшок: {filteredTable.Rows.Count}.\nНайдешевша: {cheapestToyName} ({minPrice} грн).", "Результат пошуку");
+                        BtnExportWord.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        MessageBox.Show("За вашим запитом нічого не знайдено.");
+                        BtnExportWord.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Помилка пошуку: " + ex.Message);
+            }
+        }
+
+        private void MenuSearchByAge_Click(object sender, RoutedEventArgs e)
+        {
+            PanelSearch.Visibility = Visibility.Visible;
         }
 
 
