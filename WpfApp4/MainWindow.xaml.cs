@@ -180,6 +180,7 @@ namespace WpfApp4
             TxtName.Clear(); TxtPrice.Clear(); TxtAmount.Clear(); TxtAge.Clear();
         }
 
+        // ПОШУК
         private void BtnSearch_Click(object sender, RoutedEventArgs e)
         {
             if (!int.TryParse(TxtSearchX.Text, out int searchX) || !int.TryParse(TxtSearchY.Text, out int searchY))
@@ -216,7 +217,7 @@ namespace WpfApp4
                         string ageRangeStr = row["ageRange"].ToString(); 
                         string[] parts = ageRangeStr.Split('-');        
 
-                        if (parts.Length == 2 && int.TryParse(parts[0], out int toyMinAge) && int.TryParse(parts[1], out int toyMaxAge))
+                        if (parts.Length == 2 && int.TryParse(parts[0], out int toyMinAge) &&int.TryParse(parts[1], out int toyMaxAge))
                         {
 
                             if (toyMinAge <= searchY && toyMaxAge >= searchX)
@@ -261,6 +262,16 @@ namespace WpfApp4
             PanelSearch.Visibility = Visibility.Visible;
         }
 
+        private void BtnAbandon_Click(object sender, RoutedEventArgs e)
+        {
+            PanelSearch.Visibility = Visibility.Collapsed;
+            BtnExportWord.Visibility = Visibility.Collapsed;
+
+            TxtSearchX.Clear();
+            TxtSearchY.Clear();
+
+            LoadData();
+        }
 
     }
 }
