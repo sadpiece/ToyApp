@@ -1,6 +1,10 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using Xceed.Document.NET;
+using Xceed.Words.NET;
 
 namespace WpfApp4
 {
@@ -12,6 +16,11 @@ namespace WpfApp4
         string connStr = "server=localhost; user=root; password=sd000615; database=igrashky; port=3306;";
         bool isEditMode = false;
         int selectedToyId = -1;
+        private DataTable searchResult = null;
+        float minPrice = 0;
+        string cheapestToyName = "";
+        string searchX = "";
+        string searchY = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -79,7 +88,7 @@ namespace WpfApp4
                     MessageBox.Show(isEditMode ? "Запис оновлено!" : "Іграшку додано!");
 
                     PanelManage.Visibility = Visibility.Collapsed;
-                    LoadData(); 
+                    LoadData();
                 }
             }
             catch (Exception ex)
@@ -129,7 +138,7 @@ namespace WpfApp4
             BtnAdd.Visibility = Visibility.Collapsed;
             BtnDelete.Visibility = Visibility.Collapsed;
             BtnEdit.Visibility = Visibility.Collapsed;
-            PanelManage.Visibility = Visibility.Collapsed; 
+            PanelManage.Visibility = Visibility.Collapsed;
 
             MenuLogin.Visibility = Visibility.Visible;
             MenuSearch.Visibility = Visibility.Visible;
@@ -195,6 +204,9 @@ namespace WpfApp4
                 return;
             }
 
+            this.searchX = TxtSearchX.Text;
+            this.searchY = TxtSearchY.Text;
+
             try
             {
                 using (MySqlConnection conn = new MySqlConnection(connStr))
@@ -208,16 +220,15 @@ namespace WpfApp4
                     DataTable filteredTable = dt.Clone();
 
 
-                    float minPrice = float.MaxValue;
-                    string cheapestToyName = "";
+                    minPrice = float.MaxValue;
 
 
                     foreach (DataRow row in dt.Rows)
                     {
-                        string ageRangeStr = row["ageRange"].ToString(); 
-                        string[] parts = ageRangeStr.Split('-');        
+                        string ageRangeStr = row["ageRange"].ToString();
+                        string[] parts = ageRangeStr.Split('-');
 
-                        if (parts.Length == 2 && int.TryParse(parts[0], out int toyMinAge) &&int.TryParse(parts[1], out int toyMaxAge))
+                        if (parts.Length == 2 && int.TryParse(parts[0], out int toyMinAge) && int.TryParse(parts[1], out int toyMaxAge))
                         {
 
                             if (toyMinAge <= searchY && toyMaxAge >= searchX)
@@ -237,7 +248,7 @@ namespace WpfApp4
 
 
                     MainDataGrid.ItemsSource = filteredTable.DefaultView;
-
+                    searchResult = filteredTable;
 
                     if (filteredTable.Rows.Count > 0)
                     {
@@ -269,9 +280,74 @@ namespace WpfApp4
 
             TxtSearchX.Clear();
             TxtSearchY.Clear();
+            searchResult = null;
 
             LoadData();
         }
 
+        private void ExportToWord_Click(object sender, RoutedEventArgs e)
+        {
+            if (searchResult == null || searchResult.Rows.Count == 0)
+            {
+                MessageBox.Show("Пошук не був виконаний або результат був порожнім.Будь ласка, виконайте пошук", "Помилка");
+                return;
+            }
+
+            try
+            {
+                string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Звіт_Іграшки.docx");
+
+                using (DocX doc = DocX.Create(filePath))
+                {
+                    var title = doc.InsertParagraph($"Результати пошуку іграшок для віку: Від {searchX} до {searchY} років");
+                    title.Font("Times New Roman").FontSize(14).Bold().Alignment = Alignment.center;
+                    doc.InsertParagraph("\n");
+
+                    doc.InsertParagraph("Таблиця 1 - Знайдені іграшки").Font("Times New Roman").FontSize(12);
+
+                    var table1 = doc.AddTable(searchResult.Rows.Count + 1, 4);
+                    table1.Design = TableDesign.TableGrid; 
+
+                    table1.Rows[0].Cells[0].Paragraphs[0].Append("Назва іграшки").Bold();
+                    table1.Rows[0].Cells[1].Paragraphs[0].Append("Ціна (грн)").Bold();
+                    table1.Rows[0].Cells[2].Paragraphs[0].Append("Кількість").Bold();
+                    table1.Rows[0].Cells[3].Paragraphs[0].Append("Вікові межі").Bold();
+
+                    int r = 1;
+                    foreach (DataRow row in searchResult.Rows)
+                    {
+                        table1.Rows[r].Cells[0].Paragraphs[0].Append(row["name"].ToString());
+                        table1.Rows[r].Cells[1].Paragraphs[0].Append(row["price"].ToString());
+                        table1.Rows[r].Cells[2].Paragraphs[0].Append(row["amount"].ToString());
+                        table1.Rows[r].Cells[3].Paragraphs[0].Append(row["ageRange"].ToString());
+                        r++;
+                    }
+                    doc.InsertTable(table1);
+                    doc.InsertParagraph("\n");
+
+                    doc.InsertParagraph("Таблиця 2 - Найдешевша іграшка з асортименту знайдених").Font("Times New Roman").FontSize(12);
+
+                    var table2 = doc.AddTable(2, 2);
+                    table2.Design = TableDesign.TableGrid;
+                    table2.Rows[0].Cells[0].Paragraphs[0].Append("Назва найдешевшої іграшки").Bold();
+                    table2.Rows[0].Cells[1].Paragraphs[0].Append("Ціна (грн)").Bold();
+
+                    table2.Rows[1].Cells[0].Paragraphs[0].Append(cheapestToyName);
+                    table2.Rows[1].Cells[1].Paragraphs[0].Append(minPrice.ToString());
+
+                    doc.InsertTable(table2);
+
+                    doc.Save();
+                }
+
+                MessageBox.Show("Файл 'Звіт_Іграшки.docx' успішно збережено на Робочий стіл!", "Успіх");
+
+                _ = Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Помилка генерації файлу: " + ex.Message, "Помилка");
+            }
+        }
     }
 }

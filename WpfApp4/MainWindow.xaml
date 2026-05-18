@@ -33,7 +33,7 @@
                 </Style>
             </Menu.Resources>
             <MenuItem Header="Файл">
-                <MenuItem Header="Експорт у Word"/>
+                <MenuItem x:Name="MenuExportWord" Header="Експорт у Word" Click="ExportToWord_Click"/>
             </MenuItem>
 
             <MenuItem x:Name="MenuManage" Header="Управління" Visibility="Collapsed" >
@@ -63,7 +63,7 @@
 
                 <Button x:Name="BtnSearch" Content="Шукати" Padding="5" Margin="0,0,0,10" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnSearch_Click"/>
                 <Button x:Name="BtnAbandon" Content="Скасувати" Padding="5" Margin="0,0,0,10" Background="#4299E1" Foreground="White" BorderThickness="0" Click="BtnAbandon_Click"/>
-                <Button x:Name="BtnExportWord"  Content="Зберегти у Word" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0" Visibility="Collapsed"/>
+                <Button x:Name="BtnExportWord"  Content="Зберегти у Word" Padding="5" Background="#4299E1" Foreground="White" BorderThickness="0" Visibility="Collapsed" Click="ExportToWord_Click"/>
             </StackPanel>
         </Border>
 
