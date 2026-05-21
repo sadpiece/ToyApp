@@ -13,44 +13,59 @@ namespace WpfApp4
     /// </summary>
     public partial class MainWindow : Window
     {
-        string connStr = "server=localhost; user=root; password=sd000615; database=igrashky; port=3306;";
+        // Рядок підключення зберігає параметри доступу до БД
+        private string _connStr = "server=localhost; user=root; password=sd000615; database=igrashky; port=3306;";
+        public string ConnectionString
+        {
+            get { return _connStr; }
+            private set { _connStr = value; }
+        }
+
         bool isEditMode = false;
         int selectedToyId = -1;
-        private DataTable searchResult = null;
+        private DataTable searchResult = null; // Зберігає результати останнього пошуку для подальшого експорту в Word
         float minPrice = 0;
         string cheapestToyName = "";
         string searchX = "";
         string searchY = "";
+
         public MainWindow()
         {
             InitializeComponent();
             LoadData();
+        }
+        private void ShowError(Exception ex, string contextMessage)
+        {
+            MessageBox.Show(contextMessage + ":\n" + ex.Message, "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void LoadData()
         {
             try
             {
-                using (MySqlDataAdapter adapter = new MySqlDataAdapter("SELECT * FROM igrashky", connStr))
+                using (MySqlDataAdapter adapter = new MySqlDataAdapter("SELECT * FROM igrashky", ConnectionString))
                 {
                     DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-                    MainDataGrid.ItemsSource = dt.DefaultView;
+                    adapter.Fill(dt); // Заповнюємо DataTable даними з БД
+                    MainDataGrid.ItemsSource = dt.DefaultView; // Прив'язуємо дані до інтерфейсу WPF
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Помилка завантаження даних: " + ex.Message);
+                ShowError(ex, "Помилка завантаження даних");
             }
         }
 
         // РЕДАГУВАННЯ 
         private void BtnEdit_Click_1(object sender, RoutedEventArgs e)
         {
+            // Перевіряємо, чи користувач обрав рядок у DataGrid
             if (MainDataGrid.SelectedItem is DataRowView row)
             {
                 isEditMode = true;
                 selectedToyId = (int)row["id"];
+
+                // Переносимо дані з обраного рядка назад у текстові пол
                 TxtName.Text = row["name"].ToString();
                 TxtPrice.Text = row["price"].ToString();
                 TxtAmount.Text = row["amount"].ToString();
@@ -70,9 +85,10 @@ namespace WpfApp4
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connStr))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionString))
                 {
                     conn.Open();
+                    // Залежно від прапорця isEditMode формуємо або SQL-запит на оновлення, або на вставку
                     string query = isEditMode
                         ? "UPDATE igrashky SET name=@n, price=@p, amount=@a, ageRange=@age WHERE id=@id"
                         : "INSERT INTO igrashky (name, price, amount, ageRange) VALUES (@n, @p, @a, @age)";
@@ -93,10 +109,11 @@ namespace WpfApp4
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Помилка збереження: " + ex.Message);
+                ShowError(ex, "Помилка збереження даних");
             }
         }
 
+        // Блок логіки для авторизації та керування доступом
         private void MenuLogin_Click(object sender, RoutedEventArgs e)
         {
             Window1 authForm = new Window1();
@@ -149,7 +166,7 @@ namespace WpfApp4
         {
             if (MainDataGrid.Items.Count >= 150)
             {
-                MessageBox.Show("Досягнуто ліміт асортименту (150 найменувань)!", "Обмеження");
+                MessageBox.Show("Досягнуто ліміт асортименту (150 найменувань)!", "Обмеження", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             ClearFields();
@@ -167,7 +184,7 @@ namespace WpfApp4
                 {
                     try
                     {
-                        using (MySqlConnection conn = new MySqlConnection(connStr))
+                        using (MySqlConnection conn = new MySqlConnection(ConnectionString))
                         {
                             conn.Open();
                             MySqlCommand cmd = new MySqlCommand("DELETE FROM igrashky WHERE id=@id", conn);
@@ -178,7 +195,7 @@ namespace WpfApp4
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Помилка видалення: " + ex.Message);
+                        ShowError(ex, "Помилка видалення");
                     }
                 }
             }
@@ -190,15 +207,58 @@ namespace WpfApp4
         }
 
         // ПОШУК
+
+        // Фільтрація за віковими межами
+        public static DataTable filterByAge(DataTable dt, int minAge, int maxAge)
+        {
+            DataTable filteredTable = dt.Clone();
+            foreach (DataRow row in dt.Rows)
+            {
+                // Поле ageRange має формат "X-Y", тому розбиваємо його по дефісу
+                string[] parts = row["ageRange"].ToString().Split('-');
+
+                // Перевіряємо чи є 2 частини та чи конвертуються вони в числа
+                if (parts.Length == 2 && int.TryParse(parts[0], out int toyMinAge) && int.TryParse(parts[1], out int toyMaxAge))
+                {
+                    if (toyMinAge <= maxAge && toyMaxAge >= minAge)
+                    {
+                        filteredTable.ImportRow(row);
+                    }
+                }
+            }
+            return filteredTable;
+        }
+
+        // Визначенням найдешевшої іграшки
+        public static (float Price, string Name) FindCheapestToy(DataTable dt)
+        {
+            float minPrice = float.MaxValue; // Задаємо початкове значення як максимально можливе
+            string cheapestName = "";
+
+            foreach (DataRow row in dt.Rows)
+            {
+                float currentPrice = Convert.ToSingle(row["price"]);
+
+                // Якщо поточна ціна менша за знайдену раніше - запам'ятовуємо її
+                if (currentPrice < minPrice)
+                {
+                    minPrice = currentPrice;
+                    cheapestName = row["name"].ToString();
+                }
+            }
+            return (minPrice, cheapestName); // Повертаємо кортеж з 2 значень
+        }
+
         private void BtnSearch_Click(object sender, RoutedEventArgs e)
         {
-            if (!int.TryParse(TxtSearchX.Text, out int searchX) || !int.TryParse(TxtSearchY.Text, out int searchY))
+            // Валідація вводу: переконуємося, що ввели саме числа
+            if (!int.TryParse(TxtSearchX.Text, out int searchXParsed) || !int.TryParse(TxtSearchY.Text, out int searchYParsed))
             {
                 MessageBox.Show("Будь ласка, введіть коректні числові значення для віку.");
                 return;
             }
 
-            if (searchX > searchY)
+            if (searchXParsed > searchYParsed)
             {
                 MessageBox.Show("Вік 'ВІД' не може бути більшим за вік 'ДО'.");
                 return;
@@ -209,46 +269,24 @@ namespace WpfApp4
 
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connStr))
+                using (MySqlConnection conn = new MySqlConnection(ConnectionString))
                 {
                     conn.Open();
+
+                    // Завантажуємо всі дані, щоб профільтрувати їх локально
                     MySqlDataAdapter adapter = new MySqlDataAdapter("SELECT * FROM igrashky", conn);
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
 
+                    // Викликаємо методи фільтрації
+                    DataTable filteredTable = filterByAge(dt, searchXParsed, searchYParsed);
+                    var cheapestToy = FindCheapestToy(filteredTable);
 
-                    DataTable filteredTable = dt.Clone();
-
-
-                    minPrice = float.MaxValue;
-
-
-                    foreach (DataRow row in dt.Rows)
-                    {
-                        string ageRangeStr = row["ageRange"].ToString();
-                        string[] parts = ageRangeStr.Split('-');
-
-                        if (parts.Length == 2 && int.TryParse(parts[0], out int toyMinAge) && int.TryParse(parts[1], out int toyMaxAge))
-                        {
-
-                            if (toyMinAge <= searchY && toyMaxAge >= searchX)
-                            {
-
-                                filteredTable.ImportRow(row);
-
-                                float currentPrice = Convert.ToSingle(row["price"]);
-                                if (currentPrice < minPrice)
-                                {
-                                    minPrice = currentPrice;
-                                    cheapestToyName = row["name"].ToString();
-                                }
-                            }
-                        }
-                    }
-
+                    this.minPrice = cheapestToy.Price;
+                    this.cheapestToyName = cheapestToy.Name;
 
                     MainDataGrid.ItemsSource = filteredTable.DefaultView;
-                    searchResult = filteredTable;
+                    searchResult = filteredTable; // Зберігаємо результат для можливості експорту
 
                     if (filteredTable.Rows.Count > 0)
                     {
@@ -264,7 +302,7 @@ namespace WpfApp4
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Помилка пошуку: " + ex.Message);
+                ShowError(ex, "Помилка пошуку");
             }
         }
 
@@ -285,20 +323,24 @@ namespace WpfApp4
             LoadData();
         }
 
+        // Формування звіту у Word
         private void ExportToWord_Click(object sender, RoutedEventArgs e)
         {
             if (searchResult == null || searchResult.Rows.Count == 0)
             {
-                MessageBox.Show("Пошук не був виконаний або результат був порожнім.Будь ласка, виконайте пошук", "Помилка");
+                MessageBox.Show("Пошук не був виконаний або результат був порожнім. Будь ласка, виконайте пошук", "Помилка");
                 return;
             }
 
             try
             {
+                // Формуємо шлях до Робочого столу користувача
                 string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Звіт_Іграшки.docx");
 
+                // Створюємо новий документ Word
                 using (DocX doc = DocX.Create(filePath))
                 {
+                    // Додаємо заголовок
                     var title = doc.InsertParagraph($"Результати пошуку іграшок для віку: Від {searchX} до {searchY} років");
                     title.Font("Times New Roman").FontSize(14).Bold().Alignment = Alignment.center;
                     doc.InsertParagraph("\n");
@@ -306,7 +348,7 @@ namespace WpfApp4
                     doc.InsertParagraph("Таблиця 1 - Знайдені іграшки").Font("Times New Roman").FontSize(12);
 
                     var table1 = doc.AddTable(searchResult.Rows.Count + 1, 4);
-                    table1.Design = TableDesign.TableGrid; 
+                    table1.Design = TableDesign.TableGrid;
 
                     table1.Rows[0].Cells[0].Paragraphs[0].Append("Назва іграшки").Bold();
                     table1.Rows[0].Cells[1].Paragraphs[0].Append("Ціна (грн)").Bold();
@@ -325,6 +367,7 @@ namespace WpfApp4
                     doc.InsertTable(table1);
                     doc.InsertParagraph("\n");
 
+                    // Додаємо другу таблицю для відображення найдешевшої іграшки
                     doc.InsertParagraph("Таблиця 2 - Найдешевша іграшка з асортименту знайдених").Font("Times New Roman").FontSize(12);
 
                     var table2 = doc.AddTable(2, 2);
@@ -336,17 +379,15 @@ namespace WpfApp4
                     table2.Rows[1].Cells[1].Paragraphs[0].Append(minPrice.ToString());
 
                     doc.InsertTable(table2);
-
-                    doc.Save();
+                    doc.Save(); // Зберігаємо файл на диск
                 }
 
                 MessageBox.Show("Файл 'Звіт_Іграшки.docx' успішно збережено на Робочий стіл!", "Успіх");
-
                 _ = Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Помилка генерації файлу: " + ex.Message, "Помилка");
+                ShowError(ex, "Помилка генерації файлу");
             }
         }
     }
