@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="SetupToyApp/SetupToyApp.vdproj" Type="Installer" />
   <Project Path="WpfApp4.Tests/WpfApp4.Tests.csproj" Id="9e70cf89-2576-42f9-93ff-03767798aba1" />
   <Project Path="WpfApp4.UnitTests/WpfApp4.UnitTests.csproj" Id="06684e4d-af8d-46f2-b36e-ce1edf2c4b94" />
   <Project Path="WpfApp4/WpfApp4.csproj" />
